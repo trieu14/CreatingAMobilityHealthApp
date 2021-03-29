@@ -10,7 +10,7 @@ import HealthKit
 
 /// A base view controller with a collection view displaying data type data and their chart visualizations using `DataTypeCollectionViewCell`.
 class DataTypeCollectionViewController: UIViewController {
-    
+    var selectedTimeRange: TimeRange = .Week
     static let cellIdentifier = "DataTypeCollectionViewCell"
     
     // MARK: - Properties
@@ -61,10 +61,49 @@ class DataTypeCollectionViewController: UIViewController {
         collectionView.reloadData()
     }
     
+    @objc
+    func didTapFilterButton() {
+        presentFilterTypeSelectionView()
+    }
+    
+    // MARK: - Filter Type Selection
+    
+    func presentFilterTypeSelectionView() {
+        let title = "Select Time Range"
+        let alertController = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
+        
+        for filterType in TimeRange.allCases {
+            let actionTitle = filterType.rawValue
+            let action = UIAlertAction(title: actionTitle, style: .default) { [weak self] (action) in
+                self?.didSelectFilterTypeIdentifier(filterType)
+                
+            }
+            
+            alertController.addAction(action)
+        }
+        
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel)
+        
+        alertController.addAction(cancel)
+        
+        present(alertController, animated: true)
+    }
+    func didSelectFilterTypeIdentifier(_ filterType: TimeRange) {
+        selectedTimeRange = filterType
+        loadData()
+    }
+    
+    func loadData() {
+        //subclass to reload data
+    }
+    
     // MARK: - View Helper Functions
     
     private func setupNavigationController() {
         navigationController?.navigationBar.prefersLargeTitles = true
+        let barButtonItem = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(didTapFilterButton))
+        
+        navigationItem.leftBarButtonItem = barButtonItem
     }
     
     private func setUpViews() {
@@ -141,7 +180,7 @@ extension DataTypeCollectionViewController: UICollectionViewDataSource {
                                                             for: indexPath) as? DataTypeCollectionViewCell else {
             return DataTypeCollectionViewCell()
         }
-        
+        cell.selectedTimeRange = selectedTimeRange
         cell.updateChartView(with: content.dataTypeIdentifier, values: content.values)
         
         return cell

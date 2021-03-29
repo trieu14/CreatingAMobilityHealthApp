@@ -55,6 +55,8 @@ private func preferredUnit(for identifier: String, sampleType: HKSampleType? = n
             unit = .count()
         case .distanceWalkingRunning, .sixMinuteWalkTestDistance:
             unit = .meter()
+        case.walkingSpeed:
+            unit = HKUnit.meterUnit(with: .kilo).unitDivided(by: HKUnit.hour())
         default:
             break
         }
@@ -91,6 +93,24 @@ func createLastWeekPredicate(from endDate: Date = Date()) -> NSPredicate {
     return HKQuery.predicateForSamples(withStart: startDate, end: endDate)
 }
 
+func getLastMonthStartDate(from date: Date = Date()) -> Date {
+    return Calendar.current.date(byAdding: .day, value: -30, to: date)!
+}
+
+func createLastMonthPredicate(from endDate: Date = Date()) -> NSPredicate {
+    let startDate = getLastMonthStartDate(from: endDate)
+    return HKQuery.predicateForSamples(withStart: startDate, end: endDate)
+}
+
+func getBeginningOfDate(from date: Date = Date()) -> Date {
+    return Calendar.current.startOfDay(for: date)
+}
+
+func createTodayPredicate(from endDate: Date = Date()) -> NSPredicate {
+    let startDate = getBeginningOfDate(from: endDate)
+    return HKQuery.predicateForSamples(withStart: startDate, end: endDate)
+}
+
 /// Return the most preferred `HKStatisticsOptions` for a data type identifier. Defaults to `.discreteAverage`.
 func getStatisticsOptions(for dataTypeIdentifier: String) -> HKStatisticsOptions {
     var options: HKStatisticsOptions = .discreteAverage
@@ -102,7 +122,7 @@ func getStatisticsOptions(for dataTypeIdentifier: String) -> HKStatisticsOptions
         switch quantityTypeIdentifier {
         case .stepCount, .distanceWalkingRunning:
             options = .cumulativeSum
-        case .sixMinuteWalkTestDistance:
+        case .sixMinuteWalkTestDistance, .walkingSpeed:
             options = .discreteAverage
         default:
             break

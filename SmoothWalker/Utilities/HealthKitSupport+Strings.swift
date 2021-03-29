@@ -8,6 +8,12 @@ A collection of utility functions used for displaying strings related to HealthK
 import Foundation
 import HealthKit
 
+enum TimeRange: String, CaseIterable {
+    case Day
+    case Week
+    case Month
+}
+
 // MARK: - Data Type Strings
 
 /// Return a readable name for a HealthKit data type identifier.
@@ -25,6 +31,8 @@ func getDataTypeName(for identifier: String) -> String? {
             description = "Distance Walking + Running"
         case .sixMinuteWalkTestDistance:
             description = "Six-Minute Walk"
+        case .walkingSpeed:
+            description = "Walking Speed"
         default:
             break
         }
@@ -60,6 +68,9 @@ private func getRoundedValue(for value: Double, with unit: HKUnit) -> String? {
         let numberValue = NSNumber(value: round(value))
         
         return numberFormatter.string(from: numberValue)
+    case HKUnit.meterUnit(with: .kilo).unitDivided(by: HKUnit.hour()):
+        
+        return value == 0 ? "0": String(format: "%.2f", value)
     default:
         return nil
     }
@@ -73,6 +84,8 @@ func getUnitDescription(for unit: HKUnit) -> String? {
         return "steps"
     case .meter():
         return "meters"
+    case HKUnit.meterUnit(with: .kilo).unitDivided(by: HKUnit.hour()):
+        return "km/h"
     default:
         return nil
     }
@@ -84,6 +97,8 @@ private func getUnitSuffix(for unit: HKUnit) -> String? {
         return "steps"
     case .meter():
         return "m"
+    case HKUnit.meterUnit(with: .kilo).unitDivided(by: HKUnit.hour()):
+        return "km/h"
     default:
         return nil
     }
