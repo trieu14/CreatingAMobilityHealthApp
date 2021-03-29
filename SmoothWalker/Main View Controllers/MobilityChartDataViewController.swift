@@ -14,6 +14,7 @@ class MobilityChartDataViewController: DataTypeCollectionViewController {
     let calendar: Calendar = .current
     
     var mobilityContent: [String] = [
+        HKQuantityTypeIdentifier.walkingSpeed.rawValue,
         HKQuantityTypeIdentifier.stepCount.rawValue,
         HKQuantityTypeIdentifier.distanceWalkingRunning.rawValue
     ]
@@ -42,9 +43,14 @@ class MobilityChartDataViewController: DataTypeCollectionViewController {
         }
     }
     
+    override func didSelectFilterTypeIdentifier(_ filterType: TimeRange) {
+        selectedTimeRange = filterType
+        loadData()
+    }
+
     // MARK: - Data Functions
     
-    func loadData() {
+    override func loadData() {
         performQuery {
             // Dispatch UI updates to the main thread.
             DispatchQueue.main.async { [weak self] in
@@ -61,7 +67,7 @@ class MobilityChartDataViewController: DataTypeCollectionViewController {
     
     func createAnchoredObjectQuery(for sampleType: HKSampleType) {
         // Customize query parameters
-        let predicate = createLastWeekPredicate()
+        let predicate = createPredicate(from: selectedTimeRange)
         let limit = HKObjectQueryNoLimit
         
         // Fetch anchor persisted in memory
@@ -116,11 +122,11 @@ class MobilityChartDataViewController: DataTypeCollectionViewController {
         for (index, item) in data.enumerated() {
             // Set dates
             let now = Date()
-            let startDate = getLastWeekStartDate()
+            let startDate = getStartDate(from: selectedTimeRange)
             let endDate = now
             
-            let predicate = createLastWeekPredicate()
-            let dateInterval = DateComponents(day: 1)
+            let predicate = createPredicate(from: selectedTimeRange)
+            let dateInterval = getInterval(from: selectedTimeRange)
             
             // Process data.
             let statisticsOptions = getStatisticsOptions(for: item.dataTypeIdentifier)

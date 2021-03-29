@@ -12,9 +12,9 @@ class DataTypeCollectionViewCell: UICollectionViewCell {
         
     var dataTypeIdentifier: String!
     var statisticalValues: [Double] = []
-    
+    var selectedTimeRange: TimeRange = .Week
     var chartView: OCKCartesianChartView = {
-        let chartView = OCKCartesianChartView(type: .bar)
+        let chartView = OCKCartesianChartView(type: .line)
         
         chartView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -69,11 +69,11 @@ class DataTypeCollectionViewCell: UICollectionViewCell {
         
         // Update headerView
         chartView.headerView.titleLabel.text = getDataTypeName(for: dataTypeIdentifier) ?? "Data"
-        chartView.headerView.detailLabel.text = createChartWeeklyDateRangeLabel()
+        chartView.headerView.detailLabel.text = getChartDateRangeLabel(from: selectedTimeRange)
         
         // Update graphView
         chartView.applyDefaultConfiguration()
-        chartView.graphView.horizontalAxisMarkers = createHorizontalAxisMarkers()
+        chartView.graphView.horizontalAxisMarkers = getHorizontalAxisMarkers(from: selectedTimeRange)
         
         // Update graphView dataSeries
         let dataPoints: [CGFloat] = statisticalValues.map { CGFloat($0) }
@@ -86,7 +86,7 @@ class DataTypeCollectionViewCell: UICollectionViewCell {
         }
         
         chartView.graphView.dataSeries = [
-            OCKDataSeries(values: dataPoints, title: unitTitle)
+            OCKDataSeries(values: dataPoints, title: unitTitle, size: 2)
         ]
     }
 }
